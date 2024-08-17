@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { UploadVideoResponse } from './upload-video/UploadVideoResponse';
 import { VideoDto } from './video-dto';
 import { UserService } from './user.service';
+import { YoutubeVideoDto } from './youtube-video-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -72,5 +73,12 @@ export class VideoService {
 
   dislikeVideo(videoId: string): Observable<VideoDto> {
     return this.httpClient.post<VideoDto>("http://localhost:8080/api/videos/"+videoId+"/dislike", null)
+  }
+
+  searchVideos(searchQuery: string): Observable<Array<YoutubeVideoDto>>{
+    const formData = new FormData();
+
+    formData.append('searchQuery', searchQuery)
+    return this.httpClient.post<Array<YoutubeVideoDto>>("http://localhost:8080/api/videos/youtube-search", formData)
   }
 }

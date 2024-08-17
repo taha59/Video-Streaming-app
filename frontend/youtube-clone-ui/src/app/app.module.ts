@@ -39,6 +39,7 @@ import {MatCardModule} from '@angular/material/card'
 import { CallbackComponent } from './callback/callback.component';
 import { CommentsComponent } from './comments/comments.component';
 import {MatMenuModule} from '@angular/material/menu';
+import { VideoSearchComponent } from './video-search/video-search.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import {MatMenuModule} from '@angular/material/menu';
     VideoCardComponent,
     CallbackComponent,
     CommentsComponent,
+    VideoSearchComponent
   ],
   imports: [
     BrowserModule,

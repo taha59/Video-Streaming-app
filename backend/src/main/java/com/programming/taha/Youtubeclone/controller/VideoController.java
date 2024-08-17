@@ -3,6 +3,7 @@ package com.programming.taha.Youtubeclone.controller;
 import com.programming.taha.Youtubeclone.dto.CommentDto;
 import com.programming.taha.Youtubeclone.dto.UploadVideoResponse;
 import com.programming.taha.Youtubeclone.dto.VideoDto;
+import com.programming.taha.Youtubeclone.dto.YoutubeMetaDataDto;
 import com.programming.taha.Youtubeclone.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -97,6 +98,12 @@ public class VideoController {
     @ResponseStatus(HttpStatus.OK)
     public UploadVideoResponse uploadByYoutubeUrl(@RequestParam String youtubeUrl, @RequestParam String userId) {
         return videoService.uploadByYoutubeUrl(youtubeUrl, userId);
+    }
+
+    @PostMapping("youtube-search")
+    @ResponseStatus(HttpStatus.OK)
+    public List<YoutubeMetaDataDto> youtubeVideoSearch(@RequestParam String searchQuery) {
+        return videoService.youtubeVideoSearch(searchQuery);
     }
 
 

@@ -9,6 +9,7 @@ import { HistoryComponent } from './history/history.component';
 import { LikedVideoComponent } from './liked-video/liked-video.component';
 import { FeaturedComponent } from './featured/featured.component';
 import { CallbackComponent } from './callback/callback.component';
+import { VideoSearchComponent } from './video-search/video-search.component';
 
 const routes: Routes = [
     {
@@ -25,6 +26,9 @@ const routes: Routes = [
         },
         {
           path: 'featured',component: FeaturedComponent,
+        },
+        {
+          path: 'search',component: VideoSearchComponent,
         },
       ]
     },

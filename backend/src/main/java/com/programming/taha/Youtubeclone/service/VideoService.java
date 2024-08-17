@@ -3,6 +3,7 @@ package com.programming.taha.Youtubeclone.service;
 import com.programming.taha.Youtubeclone.dto.CommentDto;
 import com.programming.taha.Youtubeclone.dto.UploadVideoResponse;
 import com.programming.taha.Youtubeclone.dto.VideoDto;
+import com.programming.taha.Youtubeclone.dto.YoutubeMetaDataDto;
 import com.programming.taha.Youtubeclone.model.Comment;
 import com.programming.taha.Youtubeclone.model.Video;
 import com.programming.taha.Youtubeclone.repository.VideoRepository;
@@ -15,6 +16,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -253,5 +255,49 @@ public class VideoService {
         }
 
 
+    }
+
+    public List<YoutubeMetaDataDto> youtubeVideoSearch(String searchQuery) {
+        List<YoutubeMetaDataDto> youtubeVideos = new ArrayList<>();
+
+        String watchUrl = "";
+        String thumbnailUrl = "";
+
+        //execute python code for downloading YouTube video by its url
+        ProcessBuilder processBuilder = new ProcessBuilder("python3", "searchYoutubeVideo.py", searchQuery);
+        processBuilder.redirectErrorStream(true); // Merge stderr with stdout
+
+
+        Process process = null;
+        try {
+            process = processBuilder.start();
+
+            // Read and print the output from the Python script (stdout)
+            InputStream inputStream = process.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+             while ((watchUrl = reader.readLine()) != null && (thumbnailUrl = reader.readLine()) != null) {
+
+                 youtubeVideos.add(new YoutubeMetaDataDto(watchUrl, thumbnailUrl));
+//                 System.out.println("watch url: "+ watchUrl); // Print each line as it's received
+//                 System.out.println("thumbnail Url: "+ thumbnailUrl);
+             }
+
+            // Wait for the Python process to complete
+
+            int exitCode = process.waitFor();
+            if(exitCode == 0) System.out.println("python video search executed successfully!");
+        }
+        catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+            if (process != null) {
+
+                process.destroy();
+            }
+        }
+
+        return youtubeVideos;
     }
 }
