@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class YoutubeMetaDataDto {
     private String youtubeUrl;
     private String thumbnailUrl;
+    private String title;
 }

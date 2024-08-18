@@ -262,6 +262,7 @@ public class VideoService {
 
         String watchUrl = "";
         String thumbnailUrl = "";
+        String title = "";
 
         //execute python code for downloading YouTube video by its url
         ProcessBuilder processBuilder = new ProcessBuilder("python3", "searchYoutubeVideo.py", searchQuery);
@@ -276,9 +277,12 @@ public class VideoService {
             InputStream inputStream = process.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-             while ((watchUrl = reader.readLine()) != null && (thumbnailUrl = reader.readLine()) != null) {
+            while ((title = reader.readLine()) != null &&
+                     (watchUrl = reader.readLine()) != null &&
+                     (thumbnailUrl = reader.readLine()) != null
+             ) {
 
-                 youtubeVideos.add(new YoutubeMetaDataDto(watchUrl, thumbnailUrl));
+                 youtubeVideos.add(new YoutubeMetaDataDto(watchUrl, thumbnailUrl, title));
 //                 System.out.println("watch url: "+ watchUrl); // Print each line as it's received
 //                 System.out.println("thumbnail Url: "+ thumbnailUrl);
              }

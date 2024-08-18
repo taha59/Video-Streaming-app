@@ -6,6 +6,7 @@ def main():
     results = Search(searchQuery)
 
     for video in results.videos:
+        print(video.title)
         print(video.watch_url)
         print(video.thumbnail_url)
 
