@@ -15,10 +15,8 @@ export class VideoService {
   constructor() { }
 
   uploadVideoByFileDrop(fileEntry: File): Observable<UploadVideoResponse> {
-    const userId = this.userService.getUser().id
     const formData = new FormData();
     formData.append('file', fileEntry, fileEntry.name);
-    formData.append('userId', userId)
 
     console.log('Uploading video...');
 
@@ -27,12 +25,9 @@ export class VideoService {
   }
 
   uploadVideoByYoutubeUrl(youtubeUrl: string): Observable<UploadVideoResponse> {
-    const userId = this.userService.getUser().id
     const formData = new FormData();
 
     formData.append('youtubeUrl', youtubeUrl)
-    formData.append('userId', userId)
-
 
     console.log('Uploading video via url...');
 
@@ -63,10 +58,6 @@ export class VideoService {
     return this.httpClient.get<Array<VideoDto>>("http://localhost:8080/api/videos")
   }
 
-  deleteAllVideos() {
-    return this.httpClient.delete("http://localhost:8080/api/videos", {responseType: 'text'})
-  }
-
   likeVideo(videoId: string): Observable<VideoDto> {
     return this.httpClient.post<VideoDto>("http://localhost:8080/api/videos/"+videoId+"/like", null)
   }
@@ -80,5 +71,9 @@ export class VideoService {
 
     formData.append('searchQuery', searchQuery)
     return this.httpClient.post<Array<YoutubeVideoDto>>("http://localhost:8080/api/videos/youtube-search", formData)
+  }
+
+  deleteVideoById(videoId: string){
+    return this.httpClient.delete("http://localhost:8080/api/videos/"+videoId, {responseType: 'text'})
   }
 }

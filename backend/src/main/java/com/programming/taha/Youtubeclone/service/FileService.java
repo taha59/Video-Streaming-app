@@ -8,5 +8,5 @@ public interface FileService {
 
     String uploadFile(MultipartFile file);
 
-    void deleteFiles();
+    void deleteFile(String videoId);
 }

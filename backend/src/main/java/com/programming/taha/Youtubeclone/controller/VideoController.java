@@ -23,8 +23,8 @@ public class VideoController {
     //endpoint for uploading a video
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UploadVideoResponse uploadVideo(@RequestParam("file") MultipartFile file, @RequestParam("userId") String userId){
-        return videoService.uploadVideo(file, "", userId);
+    public UploadVideoResponse uploadVideo(@RequestParam("file") MultipartFile file){
+        return videoService.uploadVideo(file, new YoutubeMetaDataDto());
     }
 
     //endpoint for uploading thumbnail
@@ -87,17 +87,17 @@ public class VideoController {
         return videoService.getAllVideos();
     }
 
-    @DeleteMapping()
+    @DeleteMapping("/{videoId}")
     @ResponseStatus(HttpStatus.OK)
-    public String deleteAllVideos(){
-        videoService.deleteAllVideos();
-        return "Videos deleted successfully";
+    public String deleteVideoById(@PathVariable String videoId){
+        videoService.deleteVideoById(videoId);
+        return "Video deleted successfully";
     }
 
     @PostMapping("upload-by-url")
     @ResponseStatus(HttpStatus.OK)
-    public UploadVideoResponse uploadByYoutubeUrl(@RequestParam String youtubeUrl, @RequestParam String userId) {
-        return videoService.uploadByYoutubeUrl(youtubeUrl, userId);
+    public UploadVideoResponse uploadByYoutubeUrl(@RequestParam String youtubeUrl) {
+        return videoService.uploadByYoutubeUrl(youtubeUrl);
     }
 
     @PostMapping("youtube-search")

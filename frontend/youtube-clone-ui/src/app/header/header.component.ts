@@ -38,13 +38,4 @@ export class HeaderComponent implements OnInit{
     });
 
   }
-
-  deleteAllVideos(){
-    
-    this.videoService.deleteAllVideos().subscribe(() =>
-      {
-        console.log("all videos deleted")
-      }
-    )
-  }
 }

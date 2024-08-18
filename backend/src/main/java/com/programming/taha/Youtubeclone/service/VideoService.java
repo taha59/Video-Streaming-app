@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +28,15 @@ public class VideoService {
     private final UserService userService;
     private final VideoRepository videoRepository;
 
-    public UploadVideoResponse uploadVideo(MultipartFile multipartFile, String thumbnailUrl, String userId) {
+    public UploadVideoResponse uploadVideo(MultipartFile multipartFile, YoutubeMetaDataDto youtubeMetaDataDto) {
         //upload file to AWS
+
         String videoURL = s3Service.uploadFile(multipartFile);
         var video = new Video();
         video.setVideoUrl(videoURL);
-        video.setThumbnailUrl(thumbnailUrl);
-        video.setUserId(userId);
+        video.setThumbnailUrl(youtubeMetaDataDto.getThumbnailUrl());
+        video.setTitle(youtubeMetaDataDto.getTitle());
+        video.setUserId(userService.getCurrentUser().getId());
 
         var saved_video = videoRepository.save(video);
         return new UploadVideoResponse(saved_video.getId(), saved_video.getVideoUrl());
@@ -158,13 +161,6 @@ public class VideoService {
                 .toList();
     }
 
-    public void deleteAllVideos(){
-
-        //delete all files from repository and the s3 bucket
-        videoRepository.deleteAll();
-        s3Service.deleteFiles();
-    }
-
     public List<VideoDto> getAllVideos() {
         return videoRepository.findAll().stream().map(this::setToVideoDto).toList();
     }
@@ -203,10 +199,11 @@ public class VideoService {
         return commentDto;
     }
 
-    public UploadVideoResponse uploadByYoutubeUrl(String youtubeUrl, String userId) {
+    public UploadVideoResponse uploadByYoutubeUrl(String youtubeUrl) {
 
         String filePath;
         String thumbnailUrl;
+        String title;
 
         //execute python code for downloading YouTube video by its url
         ProcessBuilder processBuilder = new ProcessBuilder("python3", "downloadYoutubeVideo.py", youtubeUrl);
@@ -223,6 +220,8 @@ public class VideoService {
 
             filePath = reader.readLine();
             thumbnailUrl = reader.readLine();
+            title = reader.readLine();
+
             System.out.println("file path: "+filePath);
 
             // Wait for the Python process to complete
@@ -249,7 +248,7 @@ public class VideoService {
                     "video/mp4",
                     data);
 
-            return uploadVideo(multipartFile, thumbnailUrl, userId);
+            return uploadVideo(multipartFile, new YoutubeMetaDataDto(youtubeUrl, thumbnailUrl, title));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -283,8 +282,6 @@ public class VideoService {
              ) {
 
                  youtubeVideos.add(new YoutubeMetaDataDto(watchUrl, thumbnailUrl, title));
-//                 System.out.println("watch url: "+ watchUrl); // Print each line as it's received
-//                 System.out.println("thumbnail Url: "+ thumbnailUrl);
              }
 
             // Wait for the Python process to complete
@@ -303,5 +300,13 @@ public class VideoService {
         }
 
         return youtubeVideos;
+    }
+
+    public void deleteVideoById(String videoId) {
+
+        Optional<Video> video = videoRepository.findById(videoId);
+        video.ifPresent(value -> s3Service.deleteFile(value.getVideoUrl()));
+
+        videoRepository.deleteById(videoId);
     }
 }

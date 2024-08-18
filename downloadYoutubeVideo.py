@@ -8,6 +8,7 @@ def main():
     ys = yt.streams.filter(file_extension='mp4').get_highest_resolution()
     print(ys.download("tmp/", "tempVideo.mp4"))
     print(yt.thumbnail_url)
+    print(yt.title)
 
 if __name__ == "__main__":
     main()

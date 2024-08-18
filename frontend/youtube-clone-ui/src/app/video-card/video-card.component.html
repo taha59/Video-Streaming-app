@@ -1,5 +1,6 @@
-<mat-card class="example-card" appearance="outlined" routerLink="/video-details/{{video.id}}">
-    <img mat-card-image [src]= "video.thumbnailUrl" alt="Thumbnail">
+<mat-card class="example-card" appearance="outlined">
+    <img mat-card-image [src]= "video.thumbnailUrl" alt="Thumbnail" routerLink="/video-details/{{video.id}}">
+
     <mat-card-header>
       <div mat-card-avatar class="example-header-image"></div>
       <mat-card-title>{{video.title}}</mat-card-title>
@@ -7,5 +8,8 @@
       <mat-card-subtitle>{{video.viewCount}} Views</mat-card-subtitle>
     </mat-card-header>
 
+    <mat-list-item role="listitem" (click) ="deleteVideo(video.id)">
+      <mat-icon matListItemIcon>delete</mat-icon>
+    </mat-list-item>
 </mat-card>
   

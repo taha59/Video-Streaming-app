@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { VideoDto } from '../video-dto';
+import { VideoService } from '../video.service';
 
 @Component({
   selector: 'app-video-card',
@@ -11,9 +12,17 @@ export class VideoCardComponent implements OnInit {
   @Input()
   video!: VideoDto
 
+  videoService = inject(VideoService)
   constructor(){}
   
   ngOnInit(): void {
       
+  }
+
+  deleteVideo(videoId: string){
+    this.videoService.deleteVideoById(videoId).subscribe(data => {
+      console.log(videoId + "deleted!")
+      window.location.reload();
+    })
   }
 }

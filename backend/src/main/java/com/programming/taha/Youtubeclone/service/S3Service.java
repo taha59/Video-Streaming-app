@@ -19,6 +19,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class S3Service implements FileService{
 
+    private static String extractS3Key(String url) {
+        // Remove the protocol (e.g., "https://") and split the URL by '/'
+        String[] urlParts = url.split("/");
+
+        // Rebuild the key from the parts after the bucket domain
+        StringBuilder keyBuilder = new StringBuilder();
+        for (int i = 3; i < urlParts.length; i++) {
+            if (i > 3) {
+                keyBuilder.append("/");
+            }
+            keyBuilder.append(urlParts[i]);
+        }
+
+        return keyBuilder.toString();
+    }
+
     public static final String BUCKETNAME = "youtubefilesbucket";
 
     private final S3Client s3Client = S3Client.create();
@@ -52,39 +68,21 @@ public class S3Service implements FileService{
     }
 
     @Override
-    public void deleteFiles() {
-        // List all objects in the bucket
-        ListObjectsRequest listObjects = ListObjectsRequest
-                .builder()
-                .bucket(BUCKETNAME)
-                .build();
+    public void deleteFile(String url){
 
-        ListObjectsResponse res = s3Client.listObjects(listObjects);
-
-        ArrayList<ObjectIdentifier> toDeleteObjectIdentifiers = new ArrayList<>();
-
-        for(S3Object object: res.contents()) {
-            System.out.println(object.key());
-            toDeleteObjectIdentifiers.add(ObjectIdentifier.builder()
-                    .key(object.key())
-                    .build());
-        }
-
-        Delete del = Delete.builder()
-                .objects(toDeleteObjectIdentifiers)
-                .build();
+        String s3Key = extractS3Key(url);
 
         try {
-            DeleteObjectsRequest multiObjectDeleteRequest = DeleteObjectsRequest.builder()
+            DeleteObjectRequest ObjectDeleteRequest = DeleteObjectRequest.builder()
                     .bucket(BUCKETNAME)
-                    .delete(del)
-                    .build();
+                    .key(s3Key).build();
 
-            s3Client.deleteObjects(multiObjectDeleteRequest);
-            System.out.println("Multiple objects are deleted!");
+            s3Client.deleteObject(ObjectDeleteRequest);
+            System.out.println("Object deleted -- " + s3Key);
 
         } catch (S3Exception e) {
             System.err.println(e.awsErrorDetails().errorMessage());
         }
+
     }
 }

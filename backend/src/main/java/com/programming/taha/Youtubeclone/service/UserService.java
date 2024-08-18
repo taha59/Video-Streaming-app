@@ -27,7 +27,7 @@ public class UserService {
                                 ("Cannot find user with id: " + userId));
     }
 
-    private User getCurrentUser(){
+    public User getCurrentUser(){
 
         String sub = ((Jwt) SecurityContextHolder
                 .getContext()
