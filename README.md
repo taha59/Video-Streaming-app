@@ -1,4 +1,4 @@
-# Youtube clone
+# Video Streaming App
 ## Description
 Full stack youtube clone application that uploads videos to AWS S3 service and saves the youtube url and metadata in the mongo db database
 ## Requirements:
