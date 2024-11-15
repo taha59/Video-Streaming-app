@@ -1,0 +1,2 @@
+# nohup gunicorn --certfile=/home/ec2-user/certificate.cer --keyfile=/home/ec2-user/private_key.key -b 0.0.0.0:5000 backend.flask-server.app:app > flask_server.log 2>&1 &
+python3 backend/flask-server/app.py

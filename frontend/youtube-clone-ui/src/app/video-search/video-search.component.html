@@ -1,0 +1,25 @@
+<div fxLayout="column" fxLayoutGap="10px">
+    
+    <div fxLayout="row" fxLayoutGap="10px" fxLayoutAlign="start center">
+        <mat-form-field appearance="fill" fxFlex="70%">
+            <mat-label>Search YouTube</mat-label>
+            <input matInput [(ngModel)]="searchQuery" placeholder="Enter search query">
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="searchVideos()">Search</button>
+    </div>
+
+    <h3>YouTube Search Results</h3>
+
+</div>
+
+<div fxLayout="row wrap" fxLayoutGap="15px grid">
+    <div fxFlex="30%" *ngFor="let youtubeDto of youtubeSearchResults">
+        <mat-card class="example-card" appearance="outlined" (click)="downloadVideo(youtubeDto.youtubeUrl)">
+            <img mat-card-image [src]="youtubeDto.thumbnailUrl" alt="Thumbnail">
+            <mat-card-header>
+                <div mat-card-avatar class="example-header-image"></div>
+                <mat-card-title>{{youtubeDto.title}}</mat-card-title>
+            </mat-card-header>
+        </mat-card>
+    </div>
+</div>
