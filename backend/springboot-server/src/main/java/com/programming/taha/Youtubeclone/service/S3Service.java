@@ -1,11 +1,6 @@
 package com.programming.taha.Youtubeclone.service;
 
-import com.programming.taha.Youtubeclone.config.AwsConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -15,9 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.services.transcribe.TranscribeClient;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -29,14 +22,7 @@ public class S3Service implements FileService{
     @Value("${s3.bucket.name}")
     String BUCKETNAME;
 
-    private final S3Client s3Client;
-
-    @Autowired
-    public S3Service(AwsCredentialsProvider awsCredentialsProvider) {
-        this.s3Client = S3Client.builder()
-                .credentialsProvider(awsCredentialsProvider)
-                .build();
-    }
+    private final S3Client s3Client = S3Client.create();
 
     @Override
     public String uploadFile (MultipartFile file) {

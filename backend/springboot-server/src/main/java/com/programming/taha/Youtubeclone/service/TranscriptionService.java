@@ -23,14 +23,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class TranscriptionService {
 
-    private final TranscribeClient transcribeClient;
-
-    @Autowired
-    public TranscriptionService(AwsCredentialsProvider awsCredentialsProvider) {
-        this.transcribeClient = TranscribeClient.builder()
-                .credentialsProvider(awsCredentialsProvider)
-                .build();
-    }
+    private final TranscribeClient transcribeClient = TranscribeClient.create();
 
     @Async
     public CompletableFuture<String> getTranscriptionFromMediaFile(String s3Url){
@@ -133,7 +126,7 @@ public class TranscriptionService {
                     .getJSONObject(0)
                     .getString("transcript");
 
-            System.out.println("Transcription: " + transcript);
+            System.out.println("Transcription Extracted!");
 
             return transcript;
         } catch (Exception e) {
