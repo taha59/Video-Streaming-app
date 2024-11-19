@@ -25,10 +25,10 @@ export class VideoSearchComponent implements OnInit{
     })
   }
 
-  downloadVideo(youtubeUrl: string){
+  downloadYoutubeVideo(youtubeUrl: string){
     if (youtubeUrl !== ""){
       console.log("downloading video for URL:", youtubeUrl)
-      this.videoService.downloadVideo(youtubeUrl)
+      this.videoService.downloadYoutubeVideo(youtubeUrl)
     }
   }
 

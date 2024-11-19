@@ -95,4 +95,10 @@ public class VideoController {
         videoService.deleteVideoById(videoId);
         return "Video deleted successfully";
     }
+
+    @PostMapping("/download-user-video")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Resource> downloadUserVideo(@RequestParam String videoUrl){
+        return videoService.downloadUserVideo(videoUrl);
+    }
 }

@@ -1,6 +1,11 @@
 package com.programming.taha.Youtubeclone.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -13,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 
 @Service
@@ -69,6 +76,41 @@ public class S3Service implements FileService{
         }
     }
 
+    @Override
+    public ResponseEntity<Resource> downloadFile(String s3Url) {
+        URI uri = null;
+        try {
+            uri = new URI(s3Url);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        String objectKey = uri.getPath()
+                .substring(1);
+
+
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(BUCKETNAME)
+                .key(objectKey)
+                .build();
+
+        ResponseInputStream<GetObjectResponse> responseInputStream = s3Client.getObject(getObjectRequest);
+
+        InputStreamResource resource = new InputStreamResource(responseInputStream);
+
+
+        if (resource.exists()) {
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, responseInputStream.response().contentDisposition())
+                    .header(HttpHeaders.CONTENT_TYPE, responseInputStream.response().contentType())
+                    .body(resource);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+    }
+
     private static String extractS3Key(String url) {
         // Remove the protocol (e.g., "https://") and split the URL by '/'
         String[] urlParts = url.split("/");
@@ -84,4 +126,5 @@ public class S3Service implements FileService{
 
         return keyBuilder.toString();
     }
+
 }

@@ -37,4 +37,8 @@ export class VideoCardComponent implements OnInit {
       window.location.reload();
     })
   }
+
+  downloadUserVideo(){
+    this.videoService.downloadUserVideo(this.video.videoUrl, this.video.title)
+  }
 }
