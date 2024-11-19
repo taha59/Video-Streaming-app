@@ -23,7 +23,7 @@ export class CommentsComponent implements OnInit {
 
   constructor(){
     this.commentsForm = new FormGroup({
-      comment: new FormControl('comment')
+      comment: new FormControl('')
     })
 
   }
@@ -35,7 +35,6 @@ export class CommentsComponent implements OnInit {
   getComments(){
     this.commentService.getAllComments(this.videoId).subscribe(data =>{
       this.commentsDto = data
-      console.log(this.commentsDto)
     })
   }
 

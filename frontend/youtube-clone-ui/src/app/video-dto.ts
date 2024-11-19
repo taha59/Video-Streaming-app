@@ -11,4 +11,5 @@ export interface VideoDto{
     likeCount: number
     dislikeCount: number
     viewCount: number
+    createdDate: string
 }

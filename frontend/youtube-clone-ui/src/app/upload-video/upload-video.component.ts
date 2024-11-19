@@ -68,7 +68,7 @@ export class UploadVideoComponent {
 
   uploadVideoByYoutubeUrl(){
     if (this.youtubeUrl !== ""){
-      this.videoService.downloadVideo(this.youtubeUrl)
+      this.videoService.downloadYoutubeVideo(this.youtubeUrl)
     }
   }
 }

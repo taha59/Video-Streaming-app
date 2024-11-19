@@ -31,6 +31,7 @@ export class SaveVideoDetailsComponent implements OnInit{
   thumbnailUrl : string
   userId: string
   aiOverview: string
+  createdDate: string
 
   announcer = inject(LiveAnnouncer);
   private readonly videoService = inject(VideoService)
@@ -46,6 +47,7 @@ export class SaveVideoDetailsComponent implements OnInit{
         this.thumbnailUrl = data.thumbnailUrl
         this.userId = data.userId
         this.aiOverview = data.aiOverview
+        this.createdDate = data.createdDate
       }
     )
 
@@ -85,13 +87,13 @@ export class SaveVideoDetailsComponent implements OnInit{
   edit(tag: string, event: MatChipEditedEvent) {
     const value = event.value.trim();
 
-    // Remove fruit if it no longer has a name
+    // Remove tag if it no longer has a name
     if (!value) {
       this.remove(tag);
       return;
     }
 
-    // Edit existing fruit
+    // Edit existing tag
     const index = this.tags.indexOf(tag);
     if (index >= 0) {
       this.tags[index] = value;
@@ -130,6 +132,7 @@ export class SaveVideoDetailsComponent implements OnInit{
       likeCount: 0,
       dislikeCount: 0,
       viewCount: 0,
+      createdDate: this.createdDate
     };
 
     //https call to backend edit video metadata. takes videodto as input and reponse is videoDto

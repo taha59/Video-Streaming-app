@@ -8,9 +8,16 @@ import com.programming.taha.Youtubeclone.model.Video;
 import com.programming.taha.Youtubeclone.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.core.io.Resource;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -213,6 +220,15 @@ public class VideoService {
         videoDto.setUserId(video.getUserId());
         videoDto.setAiOverview(video.getAiOverview());
 
+
+        // Convert Instant to LocalDateTime in the system's default time zone
+        Instant createdDate = video.getCreatedDate();
+        LocalDateTime dateTime = LocalDateTime.ofInstant(createdDate, ZoneId.systemDefault());
+
+        // Define the desired format (e.g., "dd MMMM yyyy" or "MM/dd/yyyy")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy"); // For "17 March 2023"
+        videoDto.setCreatedDate(dateTime.format(formatter));
+
         return videoDto;
     }
 
@@ -232,5 +248,9 @@ public class VideoService {
         video.ifPresent(value -> s3Service.deleteFile(value.getVideoUrl()));
 
         videoRepository.deleteById(videoId);
+    }
+
+    public ResponseEntity<Resource> downloadUserVideo(String s3Url) {
+        return s3Service.downloadFile(s3Url);
     }
 }

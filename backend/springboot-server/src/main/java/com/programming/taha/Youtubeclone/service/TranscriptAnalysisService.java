@@ -27,7 +27,7 @@ public class TranscriptAnalysisService {
             "messages": [
                 {
                     "role": "system",
-                    "content": "Given the transcription of a video, your task is to give an overview what the video is about"
+                    "content": "You are a video streaming platform. Based on the transcription of a video, summarize the video's main content and key takeaways in a concise and neutral tone."
                 },
                 {
                     "role": "user",
