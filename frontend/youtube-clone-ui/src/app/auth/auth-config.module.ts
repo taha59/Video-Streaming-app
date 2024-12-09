@@ -13,9 +13,10 @@ import { environment } from 'src/environments/environment.development';
             silentRenew: true,
             useRefreshToken: true,
             postLogoutRedirectUri: window.location.origin,
-            secureRoutes: [environment.springboot_server_url],
+            secureRoutes: [environment.flask_server_url, environment.springboot_server_url],
+        
             customParamsAuthRequest: {
-                audience: environment.springboot_server_url,
+              audience: environment.logical_api_url,
             },
             
         }

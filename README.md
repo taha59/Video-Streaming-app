@@ -34,9 +34,9 @@ Configure AWS Single Sign-On by following the guide:
     spring.data.mongodb.uri = <your MongoDB URI>  
     groq.api.key = <your Groq API key>  
     s3.bucket.name = <your S3 bucket name>  
-    spring.security.oauth2.resourceserver.jwt.jwk-set-uri = <your OAuth2 resource server>  
-    auth0.audience = http://localhost:8080  
-    auth0.userInfoEndpoint = <your Auth0 endpoint>  
+    spring.security.oauth2.resourceserver.jwt.jwk-set-uri = <your auth0 domain>
+    auth0.audience = <your logical API URL>  
+    auth0.userInfoEndpoint = <your Auth0 user info endpoint>  
     ```
 
 ### Angular Setup  
@@ -45,8 +45,7 @@ Configure AWS Single Sign-On by following the guide:
 
     ```bash
     ng generate environments
-    ```  
-
+    ```   
 3. Edit the `environment.development.ts` file and add the following:  
 
     ```typescript
@@ -54,8 +53,19 @@ Configure AWS Single Sign-On by following the guide:
         auth_authority: <your OAuth authority>,  
         auth_client_id: <your OAuth client ID>,  
         springboot_server_url: "http://localhost:8080",  
-        flask_server_url: "http://127.0.0.1:5000"  
+        flask_server_url: "http://127.0.0.1:5000",
+        logical_api_url: <your Logical API URL>  
     };
+    ```  
+    
+### Flask Setup  
+1. Create a `config.py` file inside the `backend/flask-server` directory.
+2. Set the following properties:  
+
+    ```python
+    AUTH0_JWK_SET_URI = <your auth0 domain>
+    FRONTEND_SERVER = "http://localhost:4200"
+    AUDIENCE = <your Logical API URL>
     ```  
 
 ---
@@ -95,4 +105,3 @@ bash angular_server.sh
 
 ## Enjoy!
 Access the application at `http://localhost:4200`
-

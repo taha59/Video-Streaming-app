@@ -35,5 +35,6 @@ build/
 backend/flask-server/__pycache__
 frontend/youtube-clone-ui/node
 tmp
+config.py
 backend/springboot-server/src/main/resources/secrets.properties
 frontend/youtube-clone-ui/src/environments
