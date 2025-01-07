@@ -19,8 +19,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+
 
 
 @Service
@@ -31,46 +30,19 @@ public class VideoService {
     private final UserService userService;
     private final VideoRepository videoRepository;
     private final TranscriptionService transcriptionService;
-    private final TranscriptAnalysisService transcriptAnalysisService;
+    private final LlamaAiService llamaAiService;
 
     public UploadVideoResponse uploadVideo(MultipartFile multipartFile) {
-        // Upload file to AWS and get the video URL
+        // Upload file to AWS S3 and get the video URL
         String videoURL = s3Service.uploadFile(multipartFile);
 
-        // Create the video object and save it immediately
         var video = new Video();
         video.setVideoUrl(videoURL);
         video.setUserId(userService.getCurrentUser().getId());
 
-        // Save the video initially
         var savedVideo = videoRepository.save(video);
 
-        // Asynchronously start transcription and analysis
-        CompletableFuture.runAsync(() -> {
-            try {
-                // Wait for the transcription to complete and retrieve the transcript
-                String transcript = transcriptionService.getTranscriptionFromMediaFile(videoURL).join();
-
-                // Perform transcript analysis
-                String analysis = transcriptAnalysisService.analyzeTranscript(transcript);
-
-                // Update the video with AI overview once analysis is complete
-                var updatedVideo = videoRepository.findById(savedVideo.getId());
-
-                // Check if the video exists before updating
-                if (updatedVideo.isPresent()) {
-                    var tempVideo = updatedVideo.get();
-                    tempVideo.setAiOverview(analysis);
-                    videoRepository.save(tempVideo);
-                }
-
-            } catch (Exception e) {
-                // Handle any potential exceptions that might occur during the async task
-                System.out.println("Error processing video transcription or analysis: " + e.getMessage());
-            }
-        });
-
-        // Return the saved video response immediately
+        // Return the saved video response
         return new UploadVideoResponse(savedVideo.getId(), savedVideo.getVideoUrl());
     }
 
@@ -218,16 +190,8 @@ public class VideoService {
         videoDto.setDislikeCount(video.getDislikes().get());
         videoDto.setViewCount(video.getViewCount().get());
         videoDto.setUserId(video.getUserId());
-        videoDto.setAiOverview(video.getAiOverview());
-
-
-        // Convert Instant to LocalDateTime in the system's default time zone
-        Instant createdDate = video.getCreatedDate();
-        LocalDateTime dateTime = LocalDateTime.ofInstant(createdDate, ZoneId.systemDefault());
-
-        // Define the desired format (e.g., "dd MMMM yyyy" or "MM/dd/yyyy")
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy"); // For "17 March 2023"
-        videoDto.setCreatedDate(dateTime.format(formatter));
+        videoDto.setCreatedDate(getFormattedDate(video));
+        videoDto.setAiChatHistory(video.getAiChatHistory());
 
         return videoDto;
     }
@@ -242,10 +206,21 @@ public class VideoService {
         return commentDto;
     }
 
+    private String getFormattedDate(Video video){
+
+        Instant createdDate = video.getCreatedDate();
+        LocalDateTime dateTime = LocalDateTime.ofInstant(createdDate, ZoneId.systemDefault());
+
+        // Define the desired format (e.g., "dd MMMM yyyy" or "MM/dd/yyyy")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy"); // For "17 March 2023"
+
+        return dateTime.format(formatter);
+    }
+
     public void deleteVideoById(String videoId) {
 
-        Optional<Video> video = videoRepository.findById(videoId);
-        video.ifPresent(value -> s3Service.deleteFile(value.getVideoUrl()));
+        Video video = getVideoById(videoId);
+        s3Service.deleteFile(video.getVideoUrl());
 
         videoRepository.deleteById(videoId);
     }
@@ -253,4 +228,23 @@ public class VideoService {
     public ResponseEntity<Resource> downloadUserVideo(String s3Url) {
         return s3Service.downloadFile(s3Url);
     }
+
+    public String AIChat(String videoId, String userPrompt){
+        Video video = getVideoById(videoId);
+
+
+        String aiResponse = llamaAiService.startChat(userPrompt, video);
+        videoRepository.save(video);
+
+        return aiResponse;
+    }
+
+    public void deleteAiChatHistory(String videoId){
+        Video video = getVideoById(videoId);
+
+        llamaAiService.deleteAiChatHistory(video);
+
+        videoRepository.save(video);
+    }
+
 }

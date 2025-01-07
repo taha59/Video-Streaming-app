@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -14,7 +15,6 @@ public class VideoDto {
     private String id;
     private String title;
     private String description;
-    private String aiOverview;
     private String userId;
     private Set<String> tags;
     private String videoUrl;
@@ -24,4 +24,5 @@ public class VideoDto {
     private Integer dislikeCount;
     private Integer viewCount;
     private String createdDate;
+    private List<AiChatDto> aiChatHistory;
 }

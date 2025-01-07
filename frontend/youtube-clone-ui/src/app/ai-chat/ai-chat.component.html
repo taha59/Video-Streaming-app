@@ -1,0 +1,25 @@
+<div *ngIf="aiChatHistory" class="ai-chat-history">
+          
+    <strong>AI Chat:</strong>
+    <div>
+      <div *ngFor="let aiChat of aiChatHistory">
+        <div [ngClass]="{'assistant-message': aiChat.role === 'assistant',
+         'user-message': aiChat.role === 'user'}" class="chat-message">
+          {{aiChat.content}}
+        </div>
+      </div>
+    </div>
+  <mat-divider></mat-divider>
+</div>
+
+<form class="example-form" [formGroup] = "aiChatForm">
+
+    <mat-form-field class="example-full-width">
+        <mat-label>Chat with AI</mat-label>
+        <textarea matInput [formControlName]="'userPrompt'"></textarea>
+    </mat-form-field>
+
+    <button type="submit" (click)="startAiChat()" mat-button color="primary">Ask Ai</button>
+
+</form>
+<button (click)="deleteAiChat()" mat-button color="primary">Delete All</button>

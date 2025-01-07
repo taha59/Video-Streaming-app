@@ -1,5 +1,6 @@
 package com.programming.taha.Youtubeclone.controller;
 
+import com.programming.taha.Youtubeclone.dto.AiChatDto;
 import com.programming.taha.Youtubeclone.dto.CommentDto;
 import com.programming.taha.Youtubeclone.dto.UploadVideoResponse;
 import com.programming.taha.Youtubeclone.dto.VideoDto;
@@ -101,4 +102,17 @@ public class VideoController {
     public ResponseEntity<Resource> downloadUserVideo(@RequestParam String videoUrl){
         return videoService.downloadUserVideo(videoUrl);
     }
+
+    @PostMapping("/{videoId}/ai-chat")
+    @ResponseStatus(HttpStatus.OK)
+    public String AiChat(@PathVariable String videoId, @RequestParam String userPrompt){
+        return videoService.AIChat(videoId, userPrompt);
+    }
+
+    @DeleteMapping("/{videoId}/ai-chat-history")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAiChatHistory(@PathVariable String videoId){
+        videoService.deleteAiChatHistory(videoId);
+    }
+
 }

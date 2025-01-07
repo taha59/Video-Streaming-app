@@ -7,7 +7,7 @@ import { LoginResponse, OidcSecurityService } from 'angular-auth-oidc-client';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit{
-  public api = "aa"
+  
   title = 'youtube-clone-ui';
   private readonly oidcSecurityService: OidcSecurityService = inject(OidcSecurityService)
   constructor(){}

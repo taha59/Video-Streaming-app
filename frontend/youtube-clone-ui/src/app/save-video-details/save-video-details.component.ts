@@ -7,6 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { VideoService } from '../video.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VideoDto } from '../video-dto';
+import { AiChatDto } from '../ai-chat-dto';
 
 @Component({
   selector: 'app-save-video-details',
@@ -30,8 +31,9 @@ export class SaveVideoDetailsComponent implements OnInit{
   videoUrl: string
   thumbnailUrl : string
   userId: string
-  aiOverview: string
   createdDate: string
+  transcript: string
+  aiChatHistory: AiChatDto[]
 
   announcer = inject(LiveAnnouncer);
   private readonly videoService = inject(VideoService)
@@ -46,11 +48,10 @@ export class SaveVideoDetailsComponent implements OnInit{
         this.videoUrl = data.videoUrl
         this.thumbnailUrl = data.thumbnailUrl
         this.userId = data.userId
-        this.aiOverview = data.aiOverview
         this.createdDate = data.createdDate
       }
     )
-
+    
     this.saveVideoDetailsForm = new FormGroup(
       {
         title: this.title,
@@ -124,7 +125,6 @@ export class SaveVideoDetailsComponent implements OnInit{
       userId: this.userId,
       title: this.title.value,
       description: this.description.value,
-      aiOverview: this.aiOverview,
       tags: this.tags,
       videoUrl: this.videoUrl,
       videoStatus: this.videoStatus.value,
@@ -132,7 +132,8 @@ export class SaveVideoDetailsComponent implements OnInit{
       likeCount: 0,
       dislikeCount: 0,
       viewCount: 0,
-      createdDate: this.createdDate
+      createdDate: this.createdDate,
+      aiChatHistory: this.aiChatHistory
     };
 
     //https call to backend edit video metadata. takes videodto as input and reponse is videoDto

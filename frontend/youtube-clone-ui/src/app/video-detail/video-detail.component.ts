@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { VideoService } from '../video.service';
 import { UserService } from '../user.service';
+import { AiChatDto } from '../ai-chat-dto'
 
 @Component({
   selector: 'app-video-detail',
@@ -27,6 +28,7 @@ export class VideoDetailComponent implements OnInit {
   subscriberCount: number = 0
   aiOverview: string = ""
   createdDate: string
+  aiChatHistory: Array<AiChatDto> = []
 
   isSubscribed: boolean = false
 
@@ -35,6 +37,11 @@ export class VideoDetailComponent implements OnInit {
 
     this.videoService.getVideo(this.videoId).subscribe(data =>
       {
+
+        if (!data.title){
+          data.title = "[No Title]"
+        }
+
         this.videoUrl = data.videoUrl
         this.videoTitle = data.title
         this.videoDescription = data.description
@@ -43,8 +50,8 @@ export class VideoDetailComponent implements OnInit {
         this.dislikeCount = data.dislikeCount
         this.viewCount = data.viewCount
         this.userId = data.userId
-        this.aiOverview = data.aiOverview
         this.createdDate = data.createdDate
+        this.aiChatHistory = data.aiChatHistory
         
         // update the subscribe status for the current user
         this.userService.getUpdatedUser().subscribe(currUser =>{

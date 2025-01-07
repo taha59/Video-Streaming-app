@@ -1,8 +1,10 @@
 package com.programming.taha.Youtubeclone.model;
 
+import com.programming.taha.Youtubeclone.dto.AiChatDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,8 +24,9 @@ public class Video {
     private String id;
     private String title;
     private String description;
-    private String aiOverview;
+    private String transcription;
     private String userId;
+    private List<AiChatDto> aiChatHistory = new CopyOnWriteArrayList<>();
     private AtomicInteger likes = new AtomicInteger(0);
     private AtomicInteger dislikes = new AtomicInteger(0);
     private Set<String> tags;
@@ -61,4 +64,9 @@ public class Video {
     public void deleteAllComments(){
         commentList.clear();
     }
+
+    public void appendToAiChatHistory(String role, String content) { aiChatHistory.add(new AiChatDto(role, content)); }
+
+    public void clearAiChatHistory(){ aiChatHistory.clear(); }
+
 }

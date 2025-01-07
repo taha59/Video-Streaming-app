@@ -120,4 +120,15 @@ export class VideoService {
     window.URL.revokeObjectURL(url); // Clean up URL object
   }
 
+  startAiChat(videoId: string, userPrompt: string){
+
+    const formData = new FormData();
+    formData.append('userPrompt', userPrompt);
+    return this.httpClient.post(this.apiServer + "/api/videos/" + videoId + "/ai-chat", formData, { responseType: 'text' })
+  }
+
+  deleteAiChat(videoId: string){
+    return this.httpClient.delete(this.apiServer+"/api/videos/" + videoId + "/ai-chat-history")
+  }
+
 }

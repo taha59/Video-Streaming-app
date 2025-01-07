@@ -1,0 +1,37 @@
+.ai-chat-history {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-wrap; 
+  word-wrap: break-word; 
+  overflow-wrap: break-word; 
+  /* Remove or adjust overflow property */
+  overflow: visible;
+  /* Optional: Add padding or margins for better readability */
+  padding: 10px 0;
+} 
+ /* Common styling for all chat messages */
+ .chat-message {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    max-width: 70%; /* Limit the width for better readability */
+  }
+  
+  /* Styles for AI messages */
+  .assistant-message {
+    background-color: lightgray; /* AI message background */
+    color: black; /* Text color */
+    text-align: right; /* Align text to the right */
+    margin-left: auto; /* Push to the right side */
+    border-top-right-radius: 0; /* Custom corner styling */
+  }
+  
+  /* Styles for User messages */
+  .user-message {
+    background-color: lightblue; /* User message background */
+    color: black; /* Text color */
+    text-align: left; /* Align text to the left */
+    margin-right: auto; /* Push to the left side */
+    border-top-left-radius: 0; /* Custom corner styling */
+  }

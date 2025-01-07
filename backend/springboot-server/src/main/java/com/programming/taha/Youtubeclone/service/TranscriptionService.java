@@ -3,11 +3,8 @@ package com.programming.taha.Youtubeclone.service;
 import lombok.RequiredArgsConstructor;
 
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.services.transcribe.TranscribeClient;
 import software.amazon.awssdk.services.transcribe.model.*;
 import software.amazon.awssdk.services.transcribestreaming.model.LanguageCode;
@@ -17,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +21,7 @@ public class TranscriptionService {
 
     private final TranscribeClient transcribeClient = TranscribeClient.create();
 
-    @Async
-    public CompletableFuture<String> getTranscriptionFromMediaFile(String s3Url){
+    public String getTranscriptionFromMediaFile(String s3Url){
 
         String transcriptionJobName = "transcription_" + UUID.randomUUID();
         String mediaType = "mp4"; // can be other types
@@ -97,7 +92,7 @@ public class TranscriptionService {
 
         transcribeClient.deleteTranscriptionJob(deleteTranscriptionJobRequest);
 
-        return CompletableFuture.completedFuture(extractTranscription(transcriptUri));
+        return extractTranscription(transcriptUri);
     }
 
     private String extractTranscription(String transcriptUri){

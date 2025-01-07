@@ -1,9 +1,10 @@
+import { AiChatDto } from "./ai-chat-dto"
+
 export interface VideoDto{
     id: string
     userId: string
     title: string
     description: string
-    aiOverview: string
     tags: Array<string>
     videoUrl: string
     videoStatus: string
@@ -12,4 +13,5 @@ export interface VideoDto{
     dislikeCount: number
     viewCount: number
     createdDate: string
+    aiChatHistory: AiChatDto[]
 }

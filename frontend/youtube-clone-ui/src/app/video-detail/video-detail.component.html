@@ -1,5 +1,5 @@
 <div fxLayout="row">
-    <div fxFlex="65%" class="video-detail">
+    <div fxFlex="95%" class="video-detail">
       <div fxLayout="column" fxLayoutGap="8px">
         <app-video-player *ngIf="videoUrl" [videoUrl]="videoUrl"></app-video-player>
         <div class="mat-title">{{videoTitle}}</div>
@@ -35,22 +35,25 @@
             SUBSCRIBED
           </button>
         </mat-card-header>
-        <div *ngIf="!aiOverview"> Generating AI analyses ...</div>
-  
-        <div *ngIf="aiOverview" class="ai-analyses">
-          <strong>AI analyses:</strong>
-          <div class="ai-overview-content">{{ aiOverview }}</div>
-        </div>
+
+        
+        <mat-chip-set>
+          @for (tag of videoTags; track tag) {
+            <mat-chip-row>
+            {{tag}}
+            </mat-chip-row>
+          }
+        </mat-chip-set>
         
         <mat-divider></mat-divider>
-        <mat-chip-set *ngFor="let tag of videoTags">
-            <mat-chip>{{tag}}</mat-chip>
-        </mat-chip-set>
-        <mat-divider></mat-divider>
+
+        <app-ai-chat [videoId] = "videoId"></app-ai-chat>
+
         <app-comments [videoId] = "videoId"> </app-comments>
       </div>
     </div>
-    <div fxFlex="5%"></div>
-    <div fxFlex="30%" class="suggestion-bar">
-    </div>
-  </div>
+    
+   
+  <div fxFlex="5%"></div>
+   
+</div>

@@ -17,11 +17,10 @@ flask_dir_path = os.path.abspath("backend/flask-server")
 
 app = Flask(__name__)
 
-# Enable CORS for all routes
 CORS(app, resources={r"/search": {"origins": FRONTEND_SERVER},
                      r"/download-video": {"origins": FRONTEND_SERVER, "expose_headers": ["X-Video-Title"]}}, supports_credentials=True)
 
-
+#class for verifying tokens
 class ClientCredsTokenValidator(JWTBearerTokenValidator):
     def __init__(self, issuer):
         jsonurl = urlopen(f"{issuer}.well-known/jwks.json")
@@ -51,7 +50,6 @@ def get_file_size_in_megabytes(file_size_bytes):
 @app.route('/search', methods=['POST'])
 @require_auth(None)
 def search_youtube():
-    """Search YouTube for videos."""
     search_query = request.form.get('searchQuery')
     results = Search(search_query)
     video_dto = [
@@ -68,18 +66,25 @@ def search_youtube():
 @app.route('/download-video', methods=['POST'])
 @require_auth(None)
 def download_video():
-    """Download a YouTube video."""
+
+    
+    #Download the video in mp4 format
     url = request.form.get('youtubeUrl')
     yt = YouTube(url)
     ys = yt.streams.filter(file_extension='mp4').get_highest_resolution()
     file_size_mb = get_file_size_in_megabytes(ys.filesize)
 
+    #only download videos upto 200 MB 
     if file_size_mb <= 200:
+        
+        #before downloading the video in the temp dir remove any prev files
         file_path = f"{flask_dir_path}/tmp/tempVideo.mp4"
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         if os.path.exists(file_path):
             os.remove(file_path)
         ys.download(os.path.dirname(file_path), "tempVideo.mp4")
+
+
         response = make_response(send_file(
             file_path,
             as_attachment=True,

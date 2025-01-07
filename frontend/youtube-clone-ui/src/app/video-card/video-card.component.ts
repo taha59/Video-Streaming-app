@@ -23,7 +23,13 @@ export class VideoCardComponent implements OnInit {
   
   ngOnInit(): void {
     // if video exists
+
+  
     if(this.video){
+
+      if (!this.video.title){
+        this.video.title = "[No Title]"
+      }
       this.userService.getTargetUser(this.video.userId).subscribe(data =>{
       this.userName = data.fullName
       this.pictureUrl = data.pictureUrl

@@ -40,6 +40,7 @@ import { CallbackComponent } from './callback/callback.component';
 import { CommentsComponent } from './comments/comments.component';
 import {MatMenuModule} from '@angular/material/menu';
 import { VideoSearchComponent } from './video-search/video-search.component';
+import { AiChatComponent } from './ai-chat/ai-chat.component';
 
 @NgModule({
   declarations: [
@@ -58,7 +59,8 @@ import { VideoSearchComponent } from './video-search/video-search.component';
     VideoCardComponent,
     CallbackComponent,
     CommentsComponent,
-    VideoSearchComponent
+    VideoSearchComponent,
+    AiChatComponent,
   ],
   imports: [
     BrowserModule,
