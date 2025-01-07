@@ -20,8 +20,9 @@ public class LlamaAiService {
     @Value("${groq.api.key}")
     private String groq_API_KEY;
 
-    public String startChat(String userPrompt, Video video){
+    private TranscriptionService transcriptionService;
 
+    public String startChat(String userPrompt, Video video){
         String body = prepareBody(userPrompt, video);
 
             //prepare a http request to get the groq api response

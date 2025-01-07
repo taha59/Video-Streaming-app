@@ -232,6 +232,10 @@ public class VideoService {
     public String AIChat(String videoId, String userPrompt){
         Video video = getVideoById(videoId);
 
+        if (video.getTranscription() == null){
+            String transcript = transcriptionService.getTranscriptionFromMediaFile(video.getVideoUrl());
+            video.setTranscription(transcript);
+        }
 
         String aiResponse = llamaAiService.startChat(userPrompt, video);
         videoRepository.save(video);
