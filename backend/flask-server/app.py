@@ -41,12 +41,6 @@ require_auth = ResourceProtector()
 validator = ClientCredsTokenValidator(AUTH0_JWK_SET_URI)
 require_auth.register_token_validator(validator)
 
-
-def get_file_size_in_megabytes(file_size_bytes):
-    """Converts file size from bytes to MB."""
-    return file_size_bytes / (1024 * 1024)
-
-
 @app.route('/search', methods=['POST'])
 @require_auth(None)
 def search_youtube():
@@ -71,9 +65,10 @@ def download_video():
     #Download the video in mp4 format
     url = request.form.get('youtubeUrl')
     yt = YouTube(url)
-    ys = yt.streams.filter(file_extension='mp4').get_highest_resolution()
-    file_size_mb = get_file_size_in_megabytes(ys.filesize)
 
+    ys = yt.streams.filter(file_extension='mp4').get_highest_resolution()
+    file_size_mb = ys.filesize_mb
+    
     #only download videos upto 200 MB 
     if file_size_mb <= 200:
         

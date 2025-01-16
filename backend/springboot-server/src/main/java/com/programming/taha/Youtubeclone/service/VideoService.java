@@ -1,19 +1,25 @@
 package com.programming.taha.Youtubeclone.service;
 
+import com.programming.taha.Youtubeclone.dto.AiChatDto;
 import com.programming.taha.Youtubeclone.dto.CommentDto;
 import com.programming.taha.Youtubeclone.dto.UploadVideoResponse;
 import com.programming.taha.Youtubeclone.dto.VideoDto;
 import com.programming.taha.Youtubeclone.model.Comment;
+import com.programming.taha.Youtubeclone.model.User;
 import com.programming.taha.Youtubeclone.model.Video;
+import com.programming.taha.Youtubeclone.repository.UserRepository;
 import com.programming.taha.Youtubeclone.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -29,21 +35,25 @@ public class VideoService {
     private final S3Service s3Service;
     private final UserService userService;
     private final VideoRepository videoRepository;
-    private final TranscriptionService transcriptionService;
+    private final UserRepository userRepository;
     private final LlamaAiService llamaAiService;
+    private final AmazonTranscribeService amazonTranscribeService;
 
     public UploadVideoResponse uploadVideo(MultipartFile multipartFile) {
         // Upload file to AWS S3 and get the video URL
         String videoURL = s3Service.uploadFile(multipartFile);
 
-        var video = new Video();
+        Video video = new Video();
         video.setVideoUrl(videoURL);
         video.setUserId(userService.getCurrentUser().getId());
+        videoRepository.save(video);
 
-        var savedVideo = videoRepository.save(video);
+        //get video transcript async
+        llamaAiService.getVideoTranscript(getFileCopy(multipartFile), video.getId());
+       //amazonTranscribeService.getVideoTranscript(video.getVideoUrl(), video.getId());
 
         // Return the saved video response
-        return new UploadVideoResponse(savedVideo.getId(), savedVideo.getVideoUrl());
+        return new UploadVideoResponse(video.getId(), video.getVideoUrl());
     }
 
 
@@ -72,10 +82,6 @@ public class VideoService {
         return thumbnailUrl;
     }
 
-    Video getVideoById(String videoId){
-        return videoRepository.findById(videoId)
-                .orElseThrow(() -> new IllegalArgumentException( "Video id Not Found!!" + videoId ));
-    }
 
     //function gets called whenever user requests for video details
     public VideoDto getVideoDetails(String videoId) {
@@ -86,11 +92,6 @@ public class VideoService {
         userService.addToVideoHistory(videoId);
 
         return setToVideoDto(savedVideo);
-    }
-
-    private void increaseViewCount(Video savedVideo) {
-        savedVideo.incrementViewCount();
-        videoRepository.save(savedVideo);
     }
 
     /*method for when the like button is pressed*/
@@ -176,8 +177,90 @@ public class VideoService {
         videoRepository.save(video);
     }
 
+
+    public void deleteVideoById(String videoId) {
+
+        Video video = getVideoById(videoId);
+        User currentUser = userService.getCurrentUser();
+
+        //a user can't delete a video posted by a different user
+        if (!currentUser.getId().equals(video.getUserId())){
+            throw new RuntimeException("A video can only be deleted by its owner!");
+        }
+
+        s3Service.deleteFile(video.getVideoUrl());
+        currentUser.correctVideoHistory(videoId);
+
+        userRepository.save(currentUser);
+        videoRepository.deleteById(videoId);
+    }
+
+    public ResponseEntity<Resource> downloadUserVideo(String s3Url) {
+        return s3Service.downloadFile(s3Url);
+    }
+
+    public String AIChat(String videoId, String userPrompt){
+        Video video = getVideoById(videoId);
+
+        if (video.getTranscription() == null){
+            String transcript = "";
+            video.setTranscription(transcript);
+        }
+
+        String userId = userService.getCurrentUser().getId();
+        String aiResponse = llamaAiService.startChat(userPrompt, video, userId);
+        videoRepository.save(video);
+
+        return aiResponse;
+    }
+
+    public void deleteAiChatHistory(String videoId){
+        Video video = getVideoById(videoId);
+
+        String userId = userService.getCurrentUser().getId();
+        llamaAiService.deleteAiChatHistory(video, userId);
+
+        videoRepository.save(video);
+    }
+
+    public List<AiChatDto> getAiChatHistory(String videoId){
+        Video video = getVideoById(videoId);
+
+        String userId = userService.getCurrentUser().getId();
+
+        return video.getUserAiChatHistory(userId);
+    }
+
+    private MultipartFile getFileCopy(MultipartFile multipartFile){
+        MultipartFile tempFile;
+
+        try {
+            tempFile = new MockMultipartFile
+                    (
+                            multipartFile.getName(),
+                            multipartFile.getOriginalFilename(),
+                            multipartFile.getContentType(),
+                            multipartFile.getInputStream());
+            return tempFile;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getFormattedDate(Video video){
+
+        Instant createdDate = video.getCreatedDate();
+        LocalDateTime dateTime = LocalDateTime.ofInstant(createdDate, ZoneId.systemDefault());
+
+        // Define the desired format (e.g., "dd MMMM yyyy" or "MM/dd/yyyy")
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy"); // For "17 March 2023"
+
+        return dateTime.format(formatter);
+    }
+
     //sets up videoDto
     private VideoDto setToVideoDto(Video video){
+
         VideoDto videoDto = new VideoDto();
         videoDto.setVideoUrl(video.getVideoUrl());
         videoDto.setThumbnailUrl(video.getThumbnailUrl());
@@ -191,7 +274,7 @@ public class VideoService {
         videoDto.setViewCount(video.getViewCount().get());
         videoDto.setUserId(video.getUserId());
         videoDto.setCreatedDate(getFormattedDate(video));
-        videoDto.setAiChatHistory(video.getAiChatHistory());
+        videoDto.setTranscript(video.getTranscription());
 
         return videoDto;
     }
@@ -206,49 +289,14 @@ public class VideoService {
         return commentDto;
     }
 
-    private String getFormattedDate(Video video){
-
-        Instant createdDate = video.getCreatedDate();
-        LocalDateTime dateTime = LocalDateTime.ofInstant(createdDate, ZoneId.systemDefault());
-
-        // Define the desired format (e.g., "dd MMMM yyyy" or "MM/dd/yyyy")
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy"); // For "17 March 2023"
-
-        return dateTime.format(formatter);
+    private void increaseViewCount(Video savedVideo) {
+        savedVideo.incrementViewCount();
+        videoRepository.save(savedVideo);
     }
 
-    public void deleteVideoById(String videoId) {
-
-        Video video = getVideoById(videoId);
-        s3Service.deleteFile(video.getVideoUrl());
-
-        videoRepository.deleteById(videoId);
-    }
-
-    public ResponseEntity<Resource> downloadUserVideo(String s3Url) {
-        return s3Service.downloadFile(s3Url);
-    }
-
-    public String AIChat(String videoId, String userPrompt){
-        Video video = getVideoById(videoId);
-
-        if (video.getTranscription() == null){
-            String transcript = transcriptionService.getTranscriptionFromMediaFile(video.getVideoUrl());
-            video.setTranscription(transcript);
-        }
-
-        String aiResponse = llamaAiService.startChat(userPrompt, video);
-        videoRepository.save(video);
-
-        return aiResponse;
-    }
-
-    public void deleteAiChatHistory(String videoId){
-        Video video = getVideoById(videoId);
-
-        llamaAiService.deleteAiChatHistory(video);
-
-        videoRepository.save(video);
+    private Video getVideoById(String videoId){
+        return videoRepository.findById(videoId)
+                .orElseThrow(() -> new IllegalArgumentException( "Video id Not Found!!" + videoId ));
     }
 
 }

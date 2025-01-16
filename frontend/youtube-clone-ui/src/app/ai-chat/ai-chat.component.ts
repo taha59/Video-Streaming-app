@@ -17,6 +17,7 @@ export class AiChatComponent implements OnInit{
   aiChatForm: FormGroup;
 
   aiChatHistory: Array<AiChatDto> = []
+  transcript: string
   
 
   private readonly videoService = inject(VideoService)
@@ -33,8 +34,9 @@ export class AiChatComponent implements OnInit{
   }
 
   getChatHistory(){
-    this.videoService.getVideo(this.videoId).subscribe((data)=>{
-      this.aiChatHistory = data.aiChatHistory
+    this.videoService.getAiChat(this.videoId)
+    .subscribe(aiChatHistory=>{
+      this.aiChatHistory = aiChatHistory
     })
   }
   startAiChat(){

@@ -1,8 +1,11 @@
 package com.programming.taha.Youtubeclone.service;
 
+import com.programming.taha.Youtubeclone.model.Video;
+import com.programming.taha.Youtubeclone.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.json.JSONObject;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import software.amazon.awssdk.services.transcribe.TranscribeClient;
@@ -17,11 +20,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class TranscriptionService {
+public class AmazonTranscribeService {
 
     private final TranscribeClient transcribeClient = TranscribeClient.create();
 
-    public String getTranscriptionFromMediaFile(String s3Url){
+    private final VideoRepository videoRepository;
+
+    @Async
+    public void getVideoTranscript(String s3Url, String videoId){
 
         String transcriptionJobName = "transcription_" + UUID.randomUUID();
         String mediaType = "mp4"; // can be other types
@@ -92,7 +98,11 @@ public class TranscriptionService {
 
         transcribeClient.deleteTranscriptionJob(deleteTranscriptionJobRequest);
 
-        return extractTranscription(transcriptUri);
+        Video video = videoRepository.findById(videoId)
+                .orElseThrow(() -> new IllegalArgumentException( "Video id Not Found!!" + videoId ));
+
+        video.setTranscription(extractTranscription(transcriptUri));
+        videoRepository.save(video);
     }
 
     private String extractTranscription(String transcriptUri){

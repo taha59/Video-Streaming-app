@@ -115,4 +115,10 @@ public class VideoController {
         videoService.deleteAiChatHistory(videoId);
     }
 
+    @GetMapping("/{videoId}/ai-chat-history")
+    @ResponseStatus(HttpStatus.OK)
+    public List<AiChatDto> getAiChatHistory(@PathVariable String videoId){
+        return videoService.getAiChatHistory(videoId);
+    }
+
 }

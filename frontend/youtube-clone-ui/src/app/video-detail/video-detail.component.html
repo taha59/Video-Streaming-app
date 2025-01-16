@@ -47,7 +47,7 @@
         
         <mat-divider></mat-divider>
 
-        <app-ai-chat [videoId] = "videoId"></app-ai-chat>
+        <app-ai-chat *ngIf="transcript && transcript !== ''" [videoId] = "videoId"></app-ai-chat>
 
         <app-comments [videoId] = "videoId"> </app-comments>
       </div>

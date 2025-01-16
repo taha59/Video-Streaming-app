@@ -3,7 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { VideoService } from '../video.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { VideoDto } from '../video-dto';
@@ -33,12 +33,12 @@ export class SaveVideoDetailsComponent implements OnInit{
   userId: string
   createdDate: string
   transcript: string
-  aiChatHistory: AiChatDto[]
 
   announcer = inject(LiveAnnouncer);
   private readonly videoService = inject(VideoService)
   private readonly matSnackBar = inject(MatSnackBar)
   private readonly activatedRoute = inject(ActivatedRoute)
+  private readonly router: Router = inject(Router)
 
   constructor(){
 
@@ -133,13 +133,14 @@ export class SaveVideoDetailsComponent implements OnInit{
       dislikeCount: 0,
       viewCount: 0,
       createdDate: this.createdDate,
-      aiChatHistory: this.aiChatHistory
+      transcript: ""
     };
 
     //https call to backend edit video metadata. takes videodto as input and reponse is videoDto
     this.videoService.editVideoMetadata(videoDto).subscribe(data => {
       console.log("Edited video!!",data)
       this.matSnackBar.open("Video Details edited Successfully!!", "OK")
+      this.router.navigateByUrl("")
     })
   }
 

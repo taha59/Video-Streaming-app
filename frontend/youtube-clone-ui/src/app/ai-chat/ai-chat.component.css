@@ -7,31 +7,28 @@
   overflow-wrap: break-word; 
   /* Remove or adjust overflow property */
   overflow: visible;
-  /* Optional: Add padding or margins for better readability */
-  padding: 10px 0;
+
 } 
  /* Common styling for all chat messages */
  .chat-message {
-    padding: 10px;
+    padding: 5px;
     margin: 5px;
-    border-radius: 10px;
-    max-width: 70%; /* Limit the width for better readability */
+    border-radius: 1px;
+    max-width: 70%; /*Limit the width for better readability */
   }
   
   /* Styles for AI messages */
   .assistant-message {
-    background-color: lightgray; /* AI message background */
+    background-color: lightgray; /* User message background */
     color: black; /* Text color */
-    text-align: right; /* Align text to the right */
-    margin-left: auto; /* Push to the right side */
-    border-top-right-radius: 0; /* Custom corner styling */
+    text-align: left; /* Align text to the left */
+    margin-right: auto; /* Push to the left side */
   }
   
   /* Styles for User messages */
   .user-message {
-    background-color: lightblue; /* User message background */
+    background-color: lightblue; /* AI message background */
     color: black; /* Text color */
-    text-align: left; /* Align text to the left */
-    margin-right: auto; /* Push to the left side */
-    border-top-left-radius: 0; /* Custom corner styling */
+    text-align: right; /* Align text to the right */
+    margin-left: auto; /* Push to the right side */
   }

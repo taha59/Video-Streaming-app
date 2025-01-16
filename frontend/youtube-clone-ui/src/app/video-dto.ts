@@ -13,5 +13,5 @@ export interface VideoDto{
     dislikeCount: number
     viewCount: number
     createdDate: string
-    aiChatHistory: AiChatDto[]
+    transcript: string
 }

@@ -1,12 +1,21 @@
 package com.programming.taha.Youtubeclone.service;
 import com.programming.taha.Youtubeclone.dto.AiChatDto;
 import com.programming.taha.Youtubeclone.model.Video;
+import com.programming.taha.Youtubeclone.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,11 +28,16 @@ import java.net.http.HttpResponse;
 public class LlamaAiService {
     @Value("${groq.api.key}")
     private String groq_API_KEY;
+    private final VideoRepository videoRepository;
 
-    private TranscriptionService transcriptionService;
+    public String startChat(String userPrompt, Video video, String userId){
 
-    public String startChat(String userPrompt, Video video){
-        String body = prepareBody(userPrompt, video);
+        String transcript = video.getTranscription();
+        if (transcript == null || transcript.isEmpty()){
+            throw new RuntimeException("Transcript not found!!");
+        }
+
+        String body = prepareBody(userPrompt, video, userId);
 
             //prepare a http request to get the groq api response
         HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -50,8 +64,8 @@ public class LlamaAiService {
                     .getJSONObject("message")
                     .getString("content");
 
-            video.appendToAiChatHistory("user", userPrompt);
-            video.appendToAiChatHistory( "assistant", aiResponse);
+            video.aiChatHistoryMapInsert(userId, new AiChatDto("user", userPrompt));
+            video.aiChatHistoryMapInsert(userId, new AiChatDto("assistant", aiResponse));
 
             return aiResponse;
         } catch (IOException | InterruptedException e) {
@@ -60,11 +74,55 @@ public class LlamaAiService {
 
     }
 
-    public void deleteAiChatHistory(Video video){
-        video.clearAiChatHistory();
+    public void deleteAiChatHistory(Video video, String userId){
+        video.clearAiChatHistory(userId);
     }
 
-    private static String prepareBody(String userPrompt, Video video) {
+    @Async
+    public void getVideoTranscript(MultipartFile multipartFile, String videoId){
+
+        ClassicHttpRequest httpRequest = ClassicRequestBuilder
+                .post("https://api.groq.com/openai/v1/audio/transcriptions")
+                .addHeader("Authorization", "Bearer " + groq_API_KEY)
+                .build();
+
+        // Build multipart entity
+        try {
+            HttpEntity entity = MultipartEntityBuilder.create()
+                    .addBinaryBody("file", multipartFile.getInputStream(),
+                                   ContentType.MULTIPART_FORM_DATA,
+                                   multipartFile.getOriginalFilename())
+                    .addTextBody("model", "whisper-large-v3", ContentType.TEXT_PLAIN)
+                    .build();
+
+            httpRequest.setEntity(entity);
+
+            HttpClientResponseHandler<String> responseHandler = classicHttpResponse -> {
+
+                String s = new String(classicHttpResponse.getEntity().getContent().readAllBytes());
+                classicHttpResponse.close();
+                return s;
+            };
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                String videoTranscript = httpClient.execute(httpRequest, responseHandler);
+
+                videoTranscript = new JSONObject(videoTranscript).getString("text");
+
+                Video video = videoRepository.findById(videoId)
+                        .orElseThrow(() -> new IllegalArgumentException( "Video id Not Found!!" + videoId ));
+
+                video.setTranscription(videoTranscript);
+                videoRepository.save(video);
+
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private static String prepareBody(String userPrompt, Video video, String userId) {
 
         String context = String.format("You are an AI assistant helping users ask questions " +
                 "about the video. Your job is to answer questions strictly related to the " +
@@ -75,17 +133,20 @@ public class LlamaAiService {
                 +
                 "Video transcript: transcript: %s", video.getTranscription());
 
+        //Provide context to AI for answering user questions
         JSONArray messages = new JSONArray();
         messages.put(new JSONObject()
                 .put("role", "system")
                 .put("content", context));
 
-        for (AiChatDto aiChatDto : video.getAiChatHistory()) {
+        //provide chat history to the AI for conversational awareness
+        for (AiChatDto aiChatDto : video.getUserAiChatHistory(userId)) {
             messages.put(new JSONObject()
                     .put("role", aiChatDto.getRole())
                     .put("content", aiChatDto.getContent()));
         }
 
+        //user prompt for the AI to answer to
         messages.put(new JSONObject()
                 .put("role", "user")
                 .put("content", userPrompt));

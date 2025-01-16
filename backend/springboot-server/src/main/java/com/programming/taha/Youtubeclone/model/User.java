@@ -55,4 +55,11 @@ public class User {
     public void removeFromSubscribedToUsers(String userId) { subscribedToUsers.remove(userId); }
 
     public void removeFromSubscribers(String userId) { subscribers.remove(userId); }
+
+    //invoked whenever a video is deleted
+    public void correctVideoHistory(String videoId){
+        dislikedVideos.remove(videoId);
+        videoHistory.remove(videoId);
+        likedVideos.remove(videoId);
+    }
 }

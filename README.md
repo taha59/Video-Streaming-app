@@ -1,9 +1,18 @@
 # Video Streaming App  
 
 ## Description  
-A modern full-stack application for video streaming, designed to provide a seamless experience for uploading, viewing, liking, and subscribing to videos. With built-in support for downloading and searching YouTube videos, the platform enhances your video content experience.  
+A full-stack application for video streaming.
 
-To make content discovery even easier, the app leverages AI to automatically generate short descriptions for uploaded videos.  
+**Key features:**
+
+**Upload & View Videos**: Share your creations or enjoy content uploaded by others in a user-friendly interface.
+
+**Engagement Tools:** Like, comment, and subscribe to channels to curate your personalized video feed.
+
+**YouTube Integration:**
+Search for your favorite YouTube videos and download them directly to your device.
+
+**AI-Powered Chat Assistant:** Leverage a smart virtual assistant, powered by Llama AI, to get instant answers and insights about the video content you're watching.
 
 ---
 
@@ -36,7 +45,7 @@ Configure AWS Single Sign-On by following the guide:
     s3.bucket.name = <your S3 bucket name>  
     spring.security.oauth2.resourceserver.jwt.jwk-set-uri = <your auth0 domain>
     auth0.audience = <your logical API URL>  
-    auth0.userInfoEndpoint = <your Auth0 user info endpoint>  
+    auth0.userInfoEndpoint = <your Auth0 user info endpoint>
     ```
 
 ### Angular Setup  

@@ -4,7 +4,6 @@ import com.programming.taha.Youtubeclone.dto.AiChatDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,7 +26,7 @@ public class Video {
     private String description;
     private String transcription;
     private String userId;
-    private List<AiChatDto> aiChatHistory = new CopyOnWriteArrayList<>();
+    private ConcurrentHashMap<String, List<AiChatDto>> aiChatHistoryMap = new ConcurrentHashMap<>();
     private AtomicInteger likes = new AtomicInteger(0);
     private AtomicInteger dislikes = new AtomicInteger(0);
     private Set<String> tags;
@@ -65,8 +65,24 @@ public class Video {
         commentList.clear();
     }
 
-    public void appendToAiChatHistory(String role, String content) { aiChatHistory.add(new AiChatDto(role, content)); }
+    public void clearAiChatHistory(String userId){ aiChatHistoryMap.get(userId).clear(); }
 
-    public void clearAiChatHistory(){ aiChatHistory.clear(); }
+    public void aiChatHistoryMapInsert(String userId, AiChatDto aiChatDto){
+        List<AiChatDto> aiChatDtoList = aiChatHistoryMap.get(userId);
+
+        if (aiChatDtoList == null){
+            aiChatDtoList = new CopyOnWriteArrayList<>();
+            aiChatDtoList.add(aiChatDto);
+        }
+        else {
+            aiChatDtoList.add(aiChatDto);
+        }
+        aiChatHistoryMap.put(userId, aiChatDtoList);
+    }
+
+    public List<AiChatDto> getUserAiChatHistory(String userId){
+        return aiChatHistoryMap.getOrDefault(userId, new CopyOnWriteArrayList<>());
+    }
+
 
 }

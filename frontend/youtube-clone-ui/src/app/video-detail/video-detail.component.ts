@@ -28,7 +28,7 @@ export class VideoDetailComponent implements OnInit {
   subscriberCount: number = 0
   aiOverview: string = ""
   createdDate: string
-  aiChatHistory: Array<AiChatDto> = []
+  transcript: string
 
   isSubscribed: boolean = false
 
@@ -51,7 +51,7 @@ export class VideoDetailComponent implements OnInit {
         this.viewCount = data.viewCount
         this.userId = data.userId
         this.createdDate = data.createdDate
-        this.aiChatHistory = data.aiChatHistory
+        this.transcript = data.transcript
         
         // update the subscribe status for the current user
         this.userService.getUpdatedUser().subscribe(currUser =>{

@@ -24,5 +24,5 @@ public class VideoDto {
     private Integer dislikeCount;
     private Integer viewCount;
     private String createdDate;
-    private List<AiChatDto> aiChatHistory;
+    private String transcript;
 }

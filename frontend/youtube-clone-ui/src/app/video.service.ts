@@ -5,6 +5,7 @@ import { UploadVideoResponse } from './upload-video/UploadVideoResponse';
 import { VideoDto } from './video-dto';
 import { YoutubeVideoDto } from './youtube-video-dto';
 import { environment } from 'src/environments/environment.development';
+import { AiChatDto } from './ai-chat-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -129,6 +130,10 @@ export class VideoService {
 
   deleteAiChat(videoId: string){
     return this.httpClient.delete(this.apiServer+"/api/videos/" + videoId + "/ai-chat-history")
+  }
+
+  getAiChat(videoId: string): Observable<Array<AiChatDto>>{
+    return this.httpClient.get<Array<AiChatDto>>(this.apiServer+"/api/videos/" + videoId + "/ai-chat-history")
   }
 
 }
